@@ -28,7 +28,7 @@ THE SOFTWARE.
 #ifndef POWERVR_SERVICES_H
 #define POWERVR_SERVICES_H
 
-#if defined (__cplusplus)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -91,7 +91,7 @@ bool PVRSRVCreateDeviceMemContextExt(
 		PRGX_DEVMEMCONTEXT *phRGXDevMemCtxOut,
 		PVRSRV_DEVMEMCTX *phDevMemCtxOut);
 
-void PVRSRVDestroyDeviceMemContextExt(
+void PVRSRVReleaseDeviceMemContextExt(
 		PRGX_DEVMEMCONTEXT hRGXDevMemCtx,
 		PVRSRV_DEVMEMCTX hDevMemCtx);
 
@@ -101,6 +101,11 @@ bool PVRSRVFindHeapExt(
 
 
 /* PVRSRV_DEVMEM_EXTMEM ******************************************************/
+
+/* Imports any dynamically allocated memory associated with user mode CPU
+ * virtual address mapping to the GPU domain.
+ * If CPU mapping to the memory is obtained using Services API on a hMemDesc
+ * a pointer to an uncached write-combine mapping will be returned. */
 bool PVRSRVWrapExtMemExt(const PVRSRV_DEVMEMCTX psDevMemCtx,
                          IMG_DEVMEM_SIZE_T uiSize,
                          IMG_CPU_VIRTADDR pvCpuVAddr,
@@ -110,11 +115,14 @@ bool PVRSRVWrapExtMemExt(const PVRSRV_DEVMEMCTX psDevMemCtx,
 
 
 /* PVRSRV_DEVMEM_DMABUF ******************************************************/
-#if defined(LINUX) || defined(__linux__)
+#if defined(__linux__)
 
 bool PVRSRVDmaBufExportDevMemExt(PVRSRV_MEMDESC hMemDesc,
                                  int *piFd);
 
+/* Import a DMA-BUF allocation.
+ * If CPU mapping to the memory is obtained using Services API on a phMemDescPtr
+ * a pointer to an uncached write-combine mapping will be returned. */
 bool PVRSRVDmaBufImportDevMemExt(const PVRSRV_DEV_CONNECTION *psDevConnection,
                                  int fd,
                                  PVRSRV_MEMDESC *phMemDescPtr,
@@ -124,6 +132,11 @@ bool PVRSRVDmaBufImportDevMemExt(const PVRSRV_DEV_CONNECTION *psDevConnection,
 bool PVRSRVFreeDeviceMemExt(const PVRSRV_DEV_CONNECTION *psDevConnection,
                                  PVRSRV_MEMDESC hMemDesc);
 
+/* Allocate a DMABuf by doing a Services allocation and export it
+ * to become a DMABuf or on Android do a gralloc and import the
+ * result into services.
+ * If CPU mapping to the memory is obtained using Services API on a phMemDescPtr
+ * a pointer to an uncached write-combine mapping will be returned. */
 bool PVRSRVDMABufAllocDevMemExt(const PVRSRV_DEV_CONNECTION *psDevConnection,
                                 IMG_DEVMEM_SIZE_T uiSize,
                                 IMG_DEVMEM_LOG2ALIGN_T uiLog2Align,
@@ -137,7 +150,7 @@ bool PVRSRVDMABufReleaseDevMemExt(const PVRSRV_DEV_CONNECTION *psDevConnection,
 
 #endif
 
-#if defined (__cplusplus)
+#if defined(__cplusplus)
 }
 #endif
 
